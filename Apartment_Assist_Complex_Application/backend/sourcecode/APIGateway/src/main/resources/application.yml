@@ -1,0 +1,14 @@
+server:
+  port: 7000
+
+spring:
+  application:
+    name: APIGateway
+  cloud:
+    gateway:
+      routes:
+
+        - id: core-apartment-service
+          uri: lb://COREAPARTMENTSERVICE
+          predicates:
+            - Path=/admin/**
