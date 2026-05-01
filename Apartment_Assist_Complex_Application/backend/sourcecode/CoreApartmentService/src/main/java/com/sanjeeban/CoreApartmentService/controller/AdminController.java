@@ -1,11 +1,11 @@
 package com.sanjeeban.CoreApartmentService.controller;
 
+import com.sanjeeban.CoreApartmentService.dto.*;
 import com.sanjeeban.CoreApartmentService.entity.ApartmentTypeMaster;
 import com.sanjeeban.CoreApartmentService.service.AdminService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -21,5 +21,41 @@ public class AdminController {
         List<ApartmentTypeMaster> list = adminService.getAllApartmentTypes();
         return list;
     }
+
+    @GetMapping("/hello")
+    public String getHello(@RequestParam("msg") String text) {
+        return "hello world -> " + text;
+    }
+
+
+    @PostMapping(value = "/saveNewUser",produces = "application/json", consumes = "application/json")
+    public ResponseEntity<GenericApiResponse<SaveNewUserResponse>> saveNewUser(@RequestBody SaveNewUserRequest request){
+        SaveNewUserResponse response = new SaveNewUserResponse();
+        response = adminService.createNewUser(request);
+        return ResponseEntity.ok(GenericApiResponse.success(response));
+    }
+
+    @GetMapping(value = "/getUserByUniqueNumber", produces = "application/json")
+    public ResponseEntity<GenericApiResponse<SaveNewUserRequest>> getUser(@RequestParam("uniqueNumber") String uniqueNumber){
+        SaveNewUserRequest response = new SaveNewUserRequest();
+        response = adminService.getUser(uniqueNumber);
+        return ResponseEntity.ok(GenericApiResponse.success(response));
+    }
+
+
+    @PostMapping(value = "/registerUser", consumes = "application/json",produces = "application/json")
+    public ResponseEntity<GenericApiResponse<RegisterUserResponse>> registerUser(@RequestBody RegisterUserRequest request){
+        RegisterUserResponse response = new RegisterUserResponse();
+        response = adminService.registerUser(request);
+        return ResponseEntity.ok(GenericApiResponse.success(response));
+    }
+
+    @GetMapping(value = "/getUserTypes",produces = "application/json")
+    public ResponseEntity<GenericApiResponse<UserTypeMasterResponse>> getUserTypes(){
+        UserTypeMasterResponse response = new UserTypeMasterResponse();
+        response = adminService.getUserTypes();
+        return ResponseEntity.ok(GenericApiResponse.success(response));
+    }
+
 
 }

@@ -6,8 +6,11 @@ spring:
     name: APIGateway
   cloud:
     gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
       routes:
-
         - id: core-apartment-service
           uri: lb://COREAPARTMENTSERVICE
           predicates:
