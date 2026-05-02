@@ -1,73 +1,44 @@
 import React, { useState } from "react";
-import { Container, Row, Col, Card, CardHeader, ListGroup, ListGroupItem } from "reactstrap";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-import LoginPage    from "./components/LoginPage";
-import Dashboard    from "./components/Dashboard";
-import UserCreation from "./components/UserCreation";
-import RegisterUser from "./components/RegisterUser";
-
-const MENU = ["Dashboard", "User Creation", "Register User"];
+import LoginPage      from "./components/LoginPage";
+import AdminLayout    from "./components/AdminLayout";    // ← extracted (see below)
+import ResidentLayout from "./components/ResidentLayout"; // ← new
 
 function App() {
-  const [isLoggedIn,   setIsLoggedIn]   = useState(false);
-  const [selectedPage, setSelectedPage] = useState("Dashboard");
+  // null means not logged in
+  // { username: "...", userType: "admin" | "resident" }
+  const [user, setUser] = useState(null);
 
-  // ── not logged in → show login page ──
-  if (!isLoggedIn) {
+  const handleLogin = ({ username, userType }) => {
+    setUser({ username, userType });
+  };
+
+  const handleLogout = () => setUser(null);
+
+  // ── not logged in ──
+  if (!user) {
     return (
       <>
-        <LoginPage onLogin={() => setIsLoggedIn(true)} />
+        <LoginPage onLogin={handleLogin} />
         <ToastContainer position="top-right" autoClose={4000} />
       </>
     );
   }
 
-  // ── which component to show on the right ──
-  const renderPage = () => {
-    if (selectedPage === "Dashboard")    return <Dashboard />;
-    if (selectedPage === "User Creation") return <UserCreation />;
-    if (selectedPage === "Register User") return <RegisterUser />;
-  };
-
+  // ── logged in → pick layout by type ──
   return (
-    <Container fluid className="p-3">
-
-      {/* top header */}
-      <div className="mb-3 p-2 bg-dark text-white rounded">
-        Apartment Assist — Admin Portal
+    <>
+      {user.userType === "ADMIN"    && <AdminLayout    onLogout={handleLogout} />}
+      {user.userType === "OWNER" && <ResidentLayout onLogout={handleLogout} username={user.username} />}
+       {user.userType !== "ADMIN" && user.userType !== "OWNER" && (
+      <div className="p-4 text-danger">
+        Unknown user type: "{user.userType}" — please contact support.
       </div>
-
-      <Row>
-        {/* left menu */}
-        <Col md="2">
-          <Card>
-            <CardHeader>Menu</CardHeader>
-            <ListGroup flush>
-              {MENU.map((item) => (
-                <ListGroupItem
-                  key={item}
-                  tag="button"
-                  action
-                  active={selectedPage === item}
-                  onClick={() => setSelectedPage(item)}
-                >
-                  {item}
-                </ListGroupItem>
-              ))}
-            </ListGroup>
-          </Card>
-        </Col>
-
-        {/* right content */}
-        <Col md="10">
-          {renderPage()}
-        </Col>
-      </Row>
-
+    )}
       <ToastContainer position="top-right" autoClose={4000} />
-    </Container>
+    </>
   );
 }
 

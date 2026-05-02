@@ -23,3 +23,14 @@ export const registerUser = async (userData) => {
   const response = await api.post("/admin/registerUser", payload);
   return response.data;
 };
+
+
+export const getUserType = async (username) => {
+  const response = await api.get(`/admin/getUsernameType?userName=${encodeURIComponent(username)}`);
+  return response.data.apiData;
+};
+
+
+
+// export const getUserTypes = (username) =>
+//   api.get(`/admin/getUsernameType?username=${username}`).then((r) => r.data);

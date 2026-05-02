@@ -136,6 +136,12 @@ public class AdminServiceImplementation implements AdminService {
                 .orElseThrow(() -> new InvalidCredentialsException("Unique User Number does not exist"));
 
 
+        userMappingRepository.findByUniqueUserNumber(uniqueUserNumber)
+                .ifPresent(u -> {
+                    throw new InvalidCredentialsException("User is already registered.");
+                });
+
+
         if(!checkDomainValueForUserType(registerCode)){
             throw new InvalidCredentialsException("Registration Code is Invalid.");
         }
@@ -180,6 +186,36 @@ public class AdminServiceImplementation implements AdminService {
 
         response.setUserTypeMasterMap(typeMap);
         return response;
+    }
+
+    @Override
+    public String getUserType(String userName) {
+        String userType = "";
+
+        if(checkIsNullOrBlank(userName)) throw new InvalidCredentialsException("User name is Blank.");
+
+        final String sql = """
+                select um.type_code from apt_core.t_user_info ui,apt_core.t_user_type_master utm,
+                apt_core.t_user_mapping um
+                where ui.email = ?
+                and ui.unique_user_number = um.unique_user_number
+                and um.type_code = utm.type_code
+                """;
+
+        try(Connection conn = dataSource.getConnection();
+        PreparedStatement ps = conn.prepareStatement(sql)){
+
+            ps.setString(1,userName);
+
+            try(ResultSet rs = ps.executeQuery();){
+                if(rs.next()) userType = rs.getString(1);
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        if(checkIsNullOrBlank(userType)) throw new InvalidCredentialsException("Username is invalid.");
+        return userType;
     }
 
     private boolean checkDomainValueForUserType(String registerCode) {

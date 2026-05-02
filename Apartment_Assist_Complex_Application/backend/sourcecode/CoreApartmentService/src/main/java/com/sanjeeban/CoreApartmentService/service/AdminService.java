@@ -16,4 +16,6 @@ public interface AdminService {
     public RegisterUserResponse registerUser(RegisterUserRequest request);
 
     public UserTypeMasterResponse getUserTypes();
+
+    public String getUserType(String username);
 }

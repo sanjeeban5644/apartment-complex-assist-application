@@ -58,4 +58,14 @@ public class AdminController {
     }
 
 
+    ///admin/getUsernameType?username=${usern
+
+    @GetMapping(value = "/getUsernameType")
+    public ResponseEntity<GenericApiResponse<String>> getUserNameTypes(@RequestParam String userName){
+        String userType = adminService.getUserType(userName);
+        return ResponseEntity.ok(GenericApiResponse.success(userType));
+    }
+
+
+
 }
