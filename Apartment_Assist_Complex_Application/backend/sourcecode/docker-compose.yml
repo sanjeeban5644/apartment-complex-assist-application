@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+
+  # ─────────────────────────────────────────
+  # PostgreSQL 18 — port 5434 on your machine
+  # ─────────────────────────────────────────
+  postgres:
+    image: postgres:16        # ← updated to match your local version
+    container_name: apartment_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: apartment_complex_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postSql@5644
+      TZ: Asia/Kolkata              # ← add this
+      PGTZ: Asia/Kolkata            # ← add this
+    ports:
+      - "5434:5432"           # 5434 on your machine → 5432 inside container
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # ─────────────────────────────────────────
+  # Redis — port 6381 on your machine
+  # ─────────────────────────────────────────
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: apartment_redis
+  #   restart: unless-stopped
+  #   ports:
+  #     - "6381:6379"           # 6381 on your machine → 6379 inside container
+  #   volumes:
+  #     - redis_data:/data
+  #   command: redis-server --appendonly yes
+
+  # ─────────────────────────────────────────
+  # Kafka with KRaft (no Zookeeper)
+  # port 9094 on your machine
+  # ─────────────────────────────────────────
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: apartment_kafka
+    restart: unless-stopped
+    ports:
+      - "9094:9094"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093,EXTERNAL://0.0.0.0:9094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+# ─────────────────────────────────────────
+# Named Volumes — data persists across
+# container restarts and shutdowns
+# ─────────────────────────────────────────
+volumes:
+  postgres_data:
+  # redis_data:
+  kafka_data:

@@ -27,21 +27,27 @@ function RegisterUser() {
   }, []);
 
   const handleSave = async () => {
-    if (!uniqueNumber.trim() || !userType) {
-      toast.warn("Please fill in all fields.");
-      return;
-    }
-    setIsLoading(true);
-    try {
-      const payload = { uniqueNumber, userType };  // userType holds the CODE e.g. "OWNER"
-      const response = await registerUser(payload);
-      toast.success(response.message || "Registered successfully.");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Registration failed.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+  if (!uniqueNumber.trim() || !userType) {
+    toast.warn("Please fill in all fields.");
+    return;
+  }
+  setIsLoading(true);
+  try {
+    const payload = { uniqueNumber, userType };  // userType holds the CODE e.g. "OWNER"
+    const response = await registerUser(payload);
+
+    // ✅ Use apiData fields for toast
+    toast.success(
+      `${response.apiData.remarks} — Unique Number: ${response.apiData.uniqueUserNumber} (Registered To: ${response.apiData.registeredTo})`
+    );
+
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Registration failed.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <Card>

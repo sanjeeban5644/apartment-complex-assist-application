@@ -66,6 +66,12 @@ public class AdminController {
         return ResponseEntity.ok(GenericApiResponse.success(userType));
     }
 
+    @GetMapping(value = "/testKafka")
+    public String testKafka(@RequestParam  String msg){
+        String response = adminService.testKafka(msg);
+        return response;
+    }
+
 
 
 }

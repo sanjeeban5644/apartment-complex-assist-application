@@ -18,4 +18,6 @@ public interface AdminService {
     public UserTypeMasterResponse getUserTypes();
 
     public String getUserType(String username);
+
+    public String testKafka(String msg);
 }

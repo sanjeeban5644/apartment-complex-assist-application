@@ -6,7 +6,7 @@ export const getUser = async (uniqueNumber) => {
 };
 
 export const saveUser = async (userData) => {
-  const response = await api.post("/admin/saveUser", userData);
+  const response = await api.post("/admin/saveNewUser", userData);
   return response.data;
 };
 

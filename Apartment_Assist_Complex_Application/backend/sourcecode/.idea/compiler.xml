@@ -6,12 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="CoreApartmentService" />
         <module name="DiscoveryClient" />
         <module name="APIGateway" />
         <module name="NotificationAndDocumentService" />
         <module name="PaymentService" />
+        <module name="NotificationAndDocumentService (1)" />
         <module name="AIService" />
-        <module name="CoreApartmentService" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -20,6 +21,7 @@
       <module name="CoreApartmentService" target="19" />
       <module name="DiscoveryClient" target="19" />
       <module name="NotificationAndDocumentService" target="19" />
+      <module name="NotificationAndDocumentService (1)" target="19" />
       <module name="PaymentService" target="19" />
     </bytecodeTargetLevel>
   </component>
@@ -30,6 +32,7 @@
       <module name="CoreApartmentService" options="-parameters" />
       <module name="DiscoveryClient" options="-parameters" />
       <module name="NotificationAndDocumentService" options="-parameters" />
+      <module name="NotificationAndDocumentService (1)" options="-parameters" />
       <module name="PaymentService" options="-parameters" />
     </option>
   </component>

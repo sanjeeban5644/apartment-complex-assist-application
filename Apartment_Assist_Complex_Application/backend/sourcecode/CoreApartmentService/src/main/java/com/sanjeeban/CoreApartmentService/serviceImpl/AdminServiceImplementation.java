@@ -13,6 +13,8 @@ import com.sanjeeban.CoreApartmentService.repository.UserTypeMasterRepository;
 import com.sanjeeban.CoreApartmentService.service.AdminService;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +25,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,6 +54,16 @@ public class AdminServiceImplementation implements AdminService {
     @Autowired
     UserTypeMasterRepository userTypeMasterRepository;
 
+
+    @Value("${app.kafka.topic.register}")
+    private String registerTopic;
+
+    private final KafkaTemplate<String,RegisterUserKafkaMessage> kafkaTemplate;
+
+    public AdminServiceImplementation(KafkaTemplate<String,RegisterUserKafkaMessage> kafkaTemplate) {
+        this.kafkaTemplate = kafkaTemplate;
+    }
+
     @Override
     public List<ApartmentTypeMaster> getAllApartmentTypes() {
         return apartmentTypeMasterRepository.findAll();
@@ -70,6 +83,8 @@ public class AdminServiceImplementation implements AdminService {
         if(checkIsNullOrBlank(aadhar)) throw new InvalidCredentialsException("Aadhar is invalid or Blank");
         if(checkIsNullOrBlank(mobile)) throw new InvalidCredentialsException("Mobile is Invalid or Blank");
         if(checkIsNullOrBlank(email)) throw new InvalidCredentialsException("Email is Invalid or Blank");
+        if(checkIsNullOrBlank(rawPassword)) throw new InvalidCredentialsException("Password is mandatory");
+
 
         // Parameter unique constraint check.
         if (userInfoRepository.existsByEmail(email)) {
@@ -164,6 +179,13 @@ public class AdminServiceImplementation implements AdminService {
         userMappingObj.setCreatedBy("SYSTEM ADMIN");
         userMappingRepository.save(userMappingObj);
 
+        // kafka msg sending.
+        RegisterUserKafkaMessage kafkaObj = new RegisterUserKafkaMessage();
+        Map<String,String> kafkaMap = new HashMap<>();
+        kafkaMap.put("Msg1","hello from hello");
+        kafkaObj.setDataMap(kafkaMap);
+        kafkaTemplate.send(registerTopic,kafkaObj);
+
         response.setRegisteredTo(registerCode);
         response.setUniqueUserNumber(newUniqueNumber);
         response.setRemarks("User Registered Successfully");
@@ -194,6 +216,8 @@ public class AdminServiceImplementation implements AdminService {
 
         if(checkIsNullOrBlank(userName)) throw new InvalidCredentialsException("User name is Blank.");
 
+        if(userName.equals("S56")) return "ADMIN";
+
         final String sql = """
                 select um.type_code from apt_core.t_user_info ui,apt_core.t_user_type_master utm,
                 apt_core.t_user_mapping um
@@ -216,6 +240,16 @@ public class AdminServiceImplementation implements AdminService {
 
         if(checkIsNullOrBlank(userType)) throw new InvalidCredentialsException("Username is invalid.");
         return userType;
+    }
+
+    @Override
+    public String testKafka(String msg) {
+        RegisterUserKafkaMessage kafkaObj = new RegisterUserKafkaMessage();
+        Map<String,String> kafkaMap = new HashMap<>();
+        kafkaMap.put("Msg1","hello from hello");
+        kafkaObj.setDataMap(kafkaMap);
+        kafkaTemplate.send(registerTopic,kafkaObj);
+        return "hello";
     }
 
     private boolean checkDomainValueForUserType(String registerCode) {

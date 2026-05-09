@@ -20,6 +20,7 @@ function UserCreation() {
     dob:       "",
     aadhar:    "",
     address:   "",
+    password:   ""
   });
 
   // ── helpers ─────────────────────────────────────────────
@@ -27,6 +28,7 @@ function UserCreation() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const [showPassword, setShowPassword] = useState(false);
   // ── search ──────────────────────────────────────────────
   const handleSearch = async () => {
     if (!uniqueNumber.trim()) {
@@ -55,24 +57,28 @@ function UserCreation() {
 
   // ── save ────────────────────────────────────────────────
   const handleSave = async () => {
-    setIsLoading(true);
-    try {
-      const payload = {
-        ...formData,
-        ...(isExisting && { uniqueNumber }),
-      };
-      const response = await saveUser(payload);
-      toast.success(`${response.message} — Number: ${response.userNumber}`);
-      if (!isExisting) {
-        setUniqueNumber(response.userNumber);
-        setIsExisting(true);
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Save failed.");
-    } finally {
-      setIsLoading(false);
+  setIsLoading(true);
+  try {
+    const payload = {
+      ...formData,
+      ...(isExisting && { uniqueNumber }),
+    };
+    const response = await saveUser(payload);
+
+    // ✅ Use apiData.remarks and apiData.uniqueUserNumber
+    toast.success(`${response.apiData.remarks} — Unique Number: ${response.apiData.uniqueUserNumber}`);
+
+    if (!isExisting) {
+      setUniqueNumber(response.apiData.uniqueUserNumber);
+      setIsExisting(true);
     }
-  };
+  } catch (err) {
+    toast.error(err.response?.data?.message || "Save failed.");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   // ── render ──────────────────────────────────────────────
   return (
@@ -169,6 +175,24 @@ function UserCreation() {
             </FormGroup>
           </Col>
         </Row>
+        <Col md="6">
+      <FormGroup>
+        <Label>Password</Label>
+        <Input
+          type={showPassword ? "text" : "password"}
+          value={formData.password}
+          onChange={(e) => handleChange("password", e.target.value)}
+        />
+        <div style={{ marginTop: "5px" }}>
+          <input
+            type="checkbox"
+            checked={showPassword}
+            onChange={() => setShowPassword(!showPassword)}
+          />{" "}
+          Show Password
+        </div>
+      </FormGroup>
+    </Col>
 
         <Button color="success" onClick={handleSave} disabled={isLoading}>
           {isLoading ? "Saving..." : isExisting ? "Update" : "Save"}
